@@ -1,153 +1,116 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import BookForm from './components/BookForm'
+import BookList from './components/BookList'
+import EditModal from './components/EditModal'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-  const [inputValue, setInputValue] = useState('')
-  const [showExplosion, setShowExplosion] = useState(false)
-  const [isTyping, setIsTyping] = useState(false)
-  let typingTimeout = null
+  const [books, setBooks] = useState([])
+  const [isModalOpen, setIsModalOpen] = useState(false) // state for the modal 
+  const [editingBook, setEditingBook] = useState(null) // state for the editing book
+  const [message, setMessage] = useState('') // state for the message
 
-  const handleClick = () => {
-    setCount(count + 1)
-    setShowExplosion(true)
-    setTimeout(() => setShowExplosion(false), 500) // Reset after animation
+  const showMessage = (text) => { // show a message
+    setMessage(text)
+    setTimeout(() => setMessage(''), 5000) // clear the message after 5 seconds
   }
 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value)
-    setIsTyping(true)
-    
-    // Clear existing timeout
-    if (typingTimeout) {
-      clearTimeout(typingTimeout)
+  const fetchBooks = async () => { // fetch the books
+    try {
+      const res = await fetch('http://localhost:3000/book')
+      const data = await res.json()
+      setBooks(data[0].books) // set the books to the data
+    } catch (err) {
+      console.error('Failed to fetch books:', err)
+      showMessage('Failed to load books')
     }
-    
-    // Set new timeout
-    typingTimeout = setTimeout(() => {
-      setIsTyping(false)
-    }, 1000) // Wait 1 second after last keystroke
   }
 
-  // Cleanup timeout on unmount
   useEffect(() => {
-    return () => {
-      if (typingTimeout) {
-        clearTimeout(typingTimeout)
-      }
-    }
-  }, [])
+    fetchBooks() // fetch the books when the component mounts
+  }, []) 
 
-  // Create 12 particles for the explosion
-  const particles = [...Array(12)].map((_, i) => ({
-    x: Math.cos(i * (360 / 12) * (Math.PI / 180)) * 100,
-    y: Math.sin(i * (360 / 12) * (Math.PI / 180)) * 100,
-  }))
+  const handleAddBook = async (bookName) => { 
+    try {
+      const res = await fetch('http://localhost:3000/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ book_name: bookName }),
+      })
+      const data = await res.json() 
+      showMessage(data.message) 
+      fetchBooks() // fetch the books after adding a book
+    } catch (err) {
+      console.error('Failed to add book:', err)
+      showMessage('Failed to add book')
+    }
+  }
+
+  const handleEditBook = async (id, newName) => { 
+    try {
+      const res = await fetch('http://localhost:3000/book', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, book_name: newName }),
+      })
+      if (!res.ok) throw new Error('Failed to update book')
+      
+      showMessage('Book updated successfully')
+      setIsModalOpen(false) // close the modal
+      fetchBooks() // fetch the books after updating a book 
+    } catch (err) {
+      console.error('Failed to update book:', err)
+      showMessage('Failed to update book')
+    }
+  }
+
+  const handleDeleteBook = async (id) => {
+    try {
+      const res = await fetch('http://localhost:3000/book', { // delete the book
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (!res.ok) throw new Error('Failed to delete book')
+      
+      showMessage('Book deleted successfully')
+      fetchBooks() // fetch the books after deleting a book
+    } catch (err) {
+      console.error('Failed to delete book:', err)
+      showMessage('Failed to delete book')
+    }
+  }
 
   return (
-    <>
-      <AnimatePresence>
-        {isTyping && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.4}}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 -z-10 s"
-          >
-            <div className="animated-grid" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex items-center justify-center pb-4">
-        <motion.img 
-          src={viteLogo} 
-          alt="Vite logo" 
-          className="w-24 h-24"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.img 
-          src={reactLogo} 
-          alt="React logo" 
-          className="w-24 h-24"
-          animate={{ rotate: -360 }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-        />
-      </div>
-
-      <motion.p 
-        className="text-5xl text-orange-500 font-bold text-center p-8"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        This is React with tailwind and framer motion!
-      </motion.p>
-
-      <motion.div 
-        className="flex flex-col items-center justify-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-      >
-        <div className="relative">
-          <button 
-            onClick={handleClick} 
-            className="bg-blue-500 text-white px-4 py-2 rounded-md mt-4"
-          >
-            Click me {count}
-          </button>
-
-          <AnimatePresence>
-            {showExplosion && (
-              <div className="absolute top-1/2 left-1/2">
-                {particles.map((particle, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ scale: 0, x: 0, y: 0 }}
-                    animate={{
-                      scale: [1, 0],
-                      x: particle.x,
-                      y: particle.y,
-                    }}
-                    exit={{ scale: 0, x: 0, y: 0 }}
-                    transition={{
-                      duration: 0.5,
-                      ease: "easeOut",
-                    }}
-                    className="absolute w-2 h-2 bg-yellow-400 rounded-full"
-                    style={{
-                      transform: 'translate(-50%, -50%)',
-                    }}
-                  />
-                ))}
-              </div>
-            )}
-          </AnimatePresence>
+    <div className="flex justify-center items-center min-h-screen bg-gray-900 text-white p-4">
+      <div className="flex flex-col md:flex-row w-full max-w-5xl gap-8">
+        <div className="w-full md:w-1/2">
+          <BookForm onAddBook={handleAddBook} message={message} /> {/* add the book form */}
         </div>
-
-        <input 
-          placeholder="Enter anything" 
-          type="text" 
-          className="border-2 border-gray-300 rounded-md p-2 mt-8" 
-          value={inputValue} 
-          onChange={handleInputChange}
-        />
-
-        <p className="text-2xl text-blue-500 font-bold mt-6">
-          {inputValue ? (
-            <>
-              You entered: <br />
-              <span className="text-xl text-gray-500">{inputValue}</span>
-            </>
-          ) : ''}
-        </p>
-      </motion.div>
-    </>
+        <div className="w-full md:w-1/2">
+        {/* display the book list */}
+          <BookList 
+            books={books} 
+            onEdit={(book) => { 
+              setEditingBook(book)
+              setIsModalOpen(true)
+            }}
+            onDelete={handleDeleteBook}
+            message={message}
+          /> 
+        </div>
+      </div>
+      
+      <EditModal 
+        isOpen={isModalOpen} // if the modal is open, display it
+        book={editingBook} // the book to edit
+        onClose={() => {
+          setIsModalOpen(false) // close the modal  
+          setEditingBook(null) // clear the editing book
+        }}
+        onSave={handleEditBook} // save the book
+      />
+    </div>
   )
 }
 
