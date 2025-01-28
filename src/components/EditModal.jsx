@@ -2,21 +2,21 @@
 import { useState, useEffect } from 'react';
 
 function EditModal({ isOpen, book, onClose, onSave }) {
-  const [bookName, setBookName] = useState('');
+  const [bookName, setBookName] = useState(''); // state for the book name
 
-  useEffect(() => {
+  useEffect(() => { // if the book changes, set the book name to the book name
     if (book) {
       setBookName(book.book_name);
     }
-  }, [book]);
+  }, [book]); 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e) => { // handle the submit event
     e.preventDefault();
-    if (!bookName.trim()) return;
-    onSave(book.id, bookName.trim());
+    if (!bookName.trim()) return; // if the book name is empty, return
+    onSave(book.id, bookName.trim()); // save the book name
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) return null; // if the modal is not open, return null
 
   return (
     <div className="fixed inset-0 bg-black/80 flex justify-center items-center">
