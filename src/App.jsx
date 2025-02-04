@@ -43,13 +43,16 @@ function App() {
 
   const handleEditBook = async (id, newName) => {
     try {
-      await bookApi.updateBook(id, newName)
-      showMessage('Book updated successfully')
-      setIsModalOpen(false)
-      fetchBooks()
+      
+      // Wait for the update to complete
+      await bookApi.updateBook(id, newName);            
+      fetchBooks();
+      showMessage('Book updated successfully');
+      setIsModalOpen(false);
+      setEditingBook(null);
     } catch (err) {
-      console.error('Failed to update book:', err)
-      showMessage('Failed to update book')
+      console.error('Failed to update book:', err);
+      showMessage('Failed to update book');
     }
   }
 
