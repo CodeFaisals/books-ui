@@ -30,9 +30,9 @@ function App() {
     fetchBooks() // fetch the books when the component mounts
   }, []) 
 
-  const handleAddBook = async (bookName) => {
+  const handleAddBook = async (bookName,author) => {
     try {
-      const data = await bookApi.addBook(bookName)
+      const data = await bookApi.addBook(bookName,author)
       showMessage(data.message)
       fetchBooks()
     } catch (err) {

@@ -3,9 +3,12 @@ function BookList({ books, onEdit, onDelete, message }) {
 
 
     function renderBookItem(book) {
-        return <div key={book.id} className="flex justify-between px-8 py-4">
-            <li className="flex-grow">{book.book_name}</li>
-            <div className="space-x-8">
+        return <div key={book.id} className="flex justify-between px-8 py-4 items-center">
+            <div className="flex-col">
+                <li className="flex-grow font-bold text-lg">{book.book_name}</li>
+                <li className="italic font-light text-sm text-gray-200">{book.author}</li>
+            </div>
+            <div className="space-x-8 ">
                 <button
                     onClick={() => onEdit(book)}
                     className="hover:scale-190 transition-transform scale-150"

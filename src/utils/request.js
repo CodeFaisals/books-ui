@@ -25,12 +25,13 @@ export const bookApi = {
   },
 
   // Add a new book
-  addBook: async (bookName) => {
+  addBook: async (bookName, author) => {
     const res = await fetch(`${API_BASE_URL}/book`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ book_name: bookName }),
+      body: JSON.stringify({ book_name: bookName, author: author }),
     })
+    console.log(bookName,author)
     return await res.json()
   },
 
