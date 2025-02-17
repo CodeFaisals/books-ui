@@ -41,11 +41,11 @@ function App() {
     }
   }
 
-  const handleEditBook = async (id, newName) => {
+  const handleEditBook = async (id, newName, author) => {
     try {
       
       // Wait for the update to complete
-      await bookApi.updateBook(id, newName);            
+      await bookApi.updateBook(id, newName, author);
       fetchBooks();
       showMessage('Book updated successfully');
       setIsModalOpen(false);

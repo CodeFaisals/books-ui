@@ -36,7 +36,7 @@ export const bookApi = {
   },
 
   // Update a book
-  updateBook: async (id, bookName) => {
+  updateBook: async (id, bookName, author) => {
     try {
       const res = await fetch(`${API_BASE_URL}/book`, {
         method: 'PUT',
@@ -44,7 +44,7 @@ export const bookApi = {
           'Accept': 'application/json',
           'Content-Type': 'application/json' 
         },
-        body: JSON.stringify({ id, book_name: bookName }),
+        body: JSON.stringify({ id, book_name: bookName, author: author }),
       })
       
       if (!res.ok) {
